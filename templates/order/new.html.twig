@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Order{% endblock %}
+
+{% block body %}
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0"><i class="bi bi-plus-circle"></i> Create New Order</h1>
+                <p class="text-muted mb-0">Add a new order to the system</p>
+            </div>
+            <a href="{{ path('app_order_index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {{ include('order/_form.html.twig') }}
+        </div>
+    </div>
+{% endblock %}

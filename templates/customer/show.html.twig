@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Customer Details{% endblock %}
+
+{% block body %}
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0"><i class="bi bi-people"></i> Customer Details</h1>
+                <p class="text-muted mb-0">View customer information</p>
+            </div>
+            <div>
+                <a href="{{ path('app_customer_index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <a href="{{ path('app_customer_edit', {'id': customer.id}) }}" class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i> Edit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Customer Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th width="30%">ID</th>
+                                <td>#{{ customer.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Name</th>
+                                <td><strong>{{ customer.name }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>{{ customer.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>Phone</th>
+                                <td>{{ customer.phone ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Address</th>
+                                <td>{{ customer.address ?? '-' }}</td>
+                            </tr>
+                            {% if customer.orders|length > 0 %}
+                                <tr>
+                                    <th>Total Orders</th>
+                                    <td>
+                                        <span class="badge bg-info">{{ customer.orders|length }}</span>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if customer.orders|length > 0 %}
+                <div class="card mt-3">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-cart-check"></i> Customer Orders</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in customer.orders %}
+                                        <tr>
+                                            <td>#{{ order.id }}</td>
+                                            <td>{{ order.orderDate|date('M d, Y') }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ order.status == 'delivered' ? 'success' : (order.status == 'cancelled' ? 'danger' : (order.status == 'shipped' ? 'info' : 'warning')) }}">
+                                                    {{ order.status|capitalize }}
+                                                </span>
+                                            </td>
+                                            <td><strong>{{ order.total|number_format(2, '.', ',') }} €</strong></td>
+                                            <td class="text-end">
+                                                <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-trash"></i> Danger Zone</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Once you delete a customer, there is no going back. Please be certain.</p>
+                    {{ include('customer/_delete_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Orders{% endblock %}
+
+{% block body %}
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0"><i class="bi bi-cart-check"></i> Orders</h1>
+                <p class="text-muted mb-0">Manage and track all orders</p>
+            </div>
+            <a href="{{ path('app_order_new') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Order
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Order Date</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td><strong>#{{ order.id }}</strong></td>
+                                <td>{{ order.customer.name }}</td>
+                                <td>{{ order.orderDate ? order.orderDate|date('M d, Y H:i') : '' }}</td>
+                                <td>
+                                    <span class="badge bg-{{ order.status == 'delivered' ? 'success' : (order.status == 'cancelled' ? 'danger' : (order.status == 'shipped' ? 'info' : 'warning')) }}">
+                                        {{ order.status|capitalize }}
+                                    </span>
+                                </td>
+                                <td><strong>{{ order.total|number_format(2, '.', ',') }} €</strong></td>
+                                <td class="text-end">
+                                    <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-sm btn-outline-info" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                                    <p class="text-muted mt-3">No orders found. <a href="{{ path('app_order_new') }}">Create your first order</a></p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

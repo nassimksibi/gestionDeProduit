@@ -1,17 +1,201 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}Welcome!
         {% endblock %}
+    </title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+    {% block stylesheets %}
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
+        <style>
+            :root {
+                --primary-color: #667eea;
+                --secondary-color: #764ba2;
+                --success-color: #10b981;
+                --danger-color: #ef4444;
+                --warning-color: #f59e0b;
+                --info-color: #3b82f6;
+            }
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
+            body {
+                background-color: #f8f9fa;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .navbar-custom {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                padding: 1rem 0;
+            }
+
+            .navbar-custom .navbar-brand {
+                color: white !important;
+                font-weight: 700;
+                font-size: 1.5rem;
+            }
+
+            .navbar-custom .nav-link {
+                color: rgba(255,255,255,0.9) !important;
+                font-weight: 500;
+                padding: 0.5rem 1.5rem !important;
+                border-radius: 8px;
+                transition: all 0.3s;
+                margin: 0 0.25rem;
+            }
+
+            .navbar-custom .nav-link:hover {
+                background-color: rgba(255,255,255,0.2);
+                color: white !important;
+                transform: translateY(-2px);
+            }
+
+            .navbar-custom .nav-link.active {
+                background-color: rgba(255,255,255,0.3);
+                color: white !important;
+                font-weight: 600;
+            }
+
+            .main-container {
+                min-height: calc(100vh - 100px);
+                padding: 2rem 0;
+            }
+
+            .page-header {
+                background: white;
+                border-radius: 10px;
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            }
+
+            .btn {
+                border-radius: 8px;
+                font-weight: 500;
+                padding: 0.5rem 1.5rem;
+                transition: all 0.3s;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+
+            .table {
+                background: white;
+                border-radius: 10px;
+                overflow: hidden;
+            }
+
+            .table thead {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+
+            .table thead th {
+                border: none;
+                font-weight: 600;
+                padding: 1rem;
+            }
+
+            .table tbody td {
+                padding: 1rem;
+                vertical-align: middle;
+            }
+
+            .card {
+                border: none;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+                transition: all 0.3s;
+            }
+
+            .card:hover {
+                box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+                transform: translateY(-2px);
+            }
+
+            .card-header {
+                border-radius: 10px 10px 0 0 !important;
+                border: none;
+                font-weight: 600;
+            }
+
+            .badge {
+                padding: 0.5rem 0.75rem;
+                font-weight: 500;
+                border-radius: 6px;
+            }
+
+            footer {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 1.5rem 0;
+                margin-top: 3rem;
+            }
+        </style>
+    {% endblock %}
+
+    {% block javascripts %}
+        {% block importmap %}
+            {{ importmap('app') }}
         {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    {% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <i class="bi bi-shop"></i> E-Commerce Manager
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="{{ path('app_home') }}"
+                           class="nav-link {{ app.request.attributes.get('_route') == 'app_home' ? 'active' : '' }}">
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ path('app_product_index') }}"
+                           class="nav-link {{ app.request.attributes.get('_route') starts with 'app_product' ? 'active' : '' }}">
+                            <i class="bi bi-box-seam"></i> Products
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ path('app_customer_index') }}"
+                           class="nav-link {{ app.request.attributes.get('_route') starts with 'app_customer' ? 'active' : '' }}">
+                            <i class="bi bi-people"></i> Customers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ path('app_order_index') }}"
+                           class="nav-link {{ app.request.attributes.get('_route') starts with 'app_order' ? 'active' : '' }}">
+                            <i class="bi bi-cart-check"></i> Orders
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="container">
+            {% block body %}{% endblock %}
+        </div>
+    </div>
+
+    <footer class="text-center mt-auto">
+        <div class="container">
+            <p class="mb-0">&copy; {{ "now"|date("Y") }} E-Commerce Manager. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
 </html>

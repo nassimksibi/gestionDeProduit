@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Products{% endblock %}
+
+{% block body %}
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0"><i class="bi bi-box-seam"></i> Products</h1>
+                <p class="text-muted mb-0">Manage your product inventory</p>
+            </div>
+            <a href="{{ path('app_product_new') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Product
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Label</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td>#{{ product.id }}</td>
+                                <td><strong>{{ product.label }}</strong></td>
+                                <td>{{ product.price|number_format(2, '.', ',') }} €</td>
+                                <td>
+                                    {% if product.stock is not null %}
+                                        <span class="badge bg-{{ product.stock <= 5 ? 'danger' : (product.stock <= 10 ? 'warning' : 'success') }}">
+                                            {{ product.stock }} units
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if product.stock is not null %}
+                                        {% if product.stock <= 5 %}
+                                            <span class="text-danger"><i class="bi bi-exclamation-circle"></i> Critical</span>
+                                        {% elseif product.stock <= 10 %}
+                                            <span class="text-warning"><i class="bi bi-exclamation-triangle"></i> Low</span>
+                                        {% else %}
+                                            <span class="text-success"><i class="bi bi-check-circle"></i> In Stock</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-sm btn-outline-info" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                                    <p class="text-muted mt-3">No products found. <a href="{{ path('app_product_new') }}">Create your first product</a></p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

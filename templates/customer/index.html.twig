@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Customers{% endblock %}
+
+{% block body %}
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0"><i class="bi bi-people"></i> Customers</h1>
+                <p class="text-muted mb-0">Manage your customer database</p>
+            </div>
+            <a href="{{ path('app_customer_new') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Customer
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customers %}
+                            <tr>
+                                <td>#{{ customer.id }}</td>
+                                <td><strong>{{ customer.name }}</strong></td>
+                                <td>{{ customer.email }}</td>
+                                <td>{{ customer.phone ?? '-' }}</td>
+                                <td>{{ customer.address ?? '-' }}</td>
+                                <td class="text-end">
+                                    <a href="{{ path('app_customer_show', {'id': customer.id}) }}" class="btn btn-sm btn-outline-info" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_customer_edit', {'id': customer.id}) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                                    <p class="text-muted mt-3">No customers found. <a href="{{ path('app_customer_new') }}">Create your first customer</a></p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

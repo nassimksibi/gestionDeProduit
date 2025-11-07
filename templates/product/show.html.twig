@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Product Details{% endblock %}
+
+{% block body %}
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0"><i class="bi bi-box-seam"></i> Product Details</h1>
+                <p class="text-muted mb-0">View product information</p>
+            </div>
+            <div>
+                <a href="{{ path('app_product_index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i> Edit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Product Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th width="30%">ID</th>
+                                <td>#{{ product.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Label</th>
+                                <td><strong>{{ product.label }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Price</th>
+                                <td><h4 class="mb-0 text-primary">{{ product.price|number_format(2, '.', ',') }} €</h4></td>
+                            </tr>
+                            <tr>
+                                <th>Stock</th>
+                                <td>
+                                    {% if product.stock is not null %}
+                                        <span class="badge bg-{{ product.stock <= 5 ? 'danger' : (product.stock <= 10 ? 'warning' : 'success') }}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                            {{ product.stock }} units
+                                        </span>
+                                        {% if product.stock <= 5 %}
+                                            <span class="text-danger ms-2"><i class="bi bi-exclamation-circle"></i> Critical Stock Level</span>
+                                        {% elseif product.stock <= 10 %}
+                                            <span class="text-warning ms-2"><i class="bi bi-exclamation-triangle"></i> Low Stock</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-secondary" style="font-size: 1rem; padding: 0.5rem 1rem;">Not Set</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Stock Status</th>
+                                <td>
+                                    {% if product.stock is not null %}
+                                        {% if product.stock <= 5 %}
+                                            <span class="text-danger"><i class="bi bi-x-circle"></i> Out of Stock Soon</span>
+                                        {% elseif product.stock <= 10 %}
+                                            <span class="text-warning"><i class="bi bi-exclamation-triangle"></i> Low Stock</span>
+                                        {% else %}
+                                            <span class="text-success"><i class="bi bi-check-circle"></i> In Stock</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-trash"></i> Danger Zone</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Once you delete a product, there is no going back. Please be certain.</p>
+                    {{ include('product/_delete_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

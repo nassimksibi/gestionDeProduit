@@ -1,0 +1,456 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true, 'id': 'order-form'}}) }}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                {{ form_label(form.customer, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.customer, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.customer) }}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="mb-3">
+                {{ form_label(form.orderDate, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.orderDate, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.orderDate) }}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="mb-3">
+                {{ form_label(form.status, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.status) }}
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0"><i class="bi bi-list-ul"></i> Order Items</h5>
+            <button type="button" class="btn btn-sm btn-success" id="add-item-btn">
+                <i class="bi bi-plus-circle"></i> Add Product
+            </button>
+        </div>
+
+        <div id="order-items-list" data-prototype="{{ form_widget(form.orderItems.vars.prototype)|e('html_attr') }}" data-index="{{ form.orderItems|length }}">
+            {% for item in form.orderItems %}
+                <div class="order-item-row card mb-3" data-index="{{ loop.index0 }}">
+                    <div class="card-body">
+                        <div class="row align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label">Product</label>
+                                {{ form_widget(item.product, {'attr': {'class': 'form-select product-select'}}) }}
+                                {{ form_errors(item.product) }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Quantity</label>
+                                {{ form_widget(item.quantity, {'attr': {'class': 'form-control item-quantity', 'min': 1}}) }}
+                                {{ form_errors(item.quantity) }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Price</label>
+                                <div class="input-group">
+                                    {{ form_widget(item.price, {'attr': {'class': 'form-control item-price', 'readonly': true}}) }}
+                                    <span class="input-group-text">€</span>
+                                </div>
+                                {{ form_errors(item.price) }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Subtotal</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control item-subtotal" readonly value="0.00">
+                                    <span class="input-group-text">€</span>
+                                </div>
+                            </div>
+                            <div class="col-md-12 mt-2">
+                                <button type="button" class="btn btn-sm btn-danger remove-item-btn">
+                                    <i class="bi bi-trash"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if form.orderItems|length == 0 %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No items added yet. Click "Add Product" to start adding items to this order.
+            </div>
+        {% endif %}
+
+        {{ form_errors(form.orderItems) }}
+    </div>
+
+    <hr class="my-4">
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                {{ form_label(form.total, null, {'label_attr': {'class': 'form-label'}}) }}
+                <div class="input-group">
+                    {{ form_widget(form.total, {'attr': {'class': 'form-control', 'readonly': true, 'id': 'order-total'}}) }}
+                    <span class="input-group-text">€</span>
+                </div>
+                <div class="mt-2">
+                    <strong>Calculated Total: <span id="calculated-total-display" class="text-primary">0.00</span> €</strong>
+                </div>
+                <small class="form-text text-muted">Total is calculated automatically from order items</small>
+                {{ form_errors(form.total) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> {{ button_label|default('Save') }}
+        </button>
+        <a href="{{ path('app_order_index') }}" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+{{ form_end(form) }}
+
+<script>
+(function() {
+    'use strict';
+    
+    function initOrderForm() {
+        const itemsList = document.getElementById('order-items-list');
+        if (!itemsList) {
+            console.warn('Order items list not found');
+            return;
+        }
+        
+        const addButton = document.getElementById('add-item-btn');
+        if (!addButton) {
+            console.warn('Add item button not found');
+            return;
+        }
+        
+        let index = parseInt(itemsList.dataset.index) || 0;
+
+        // Product prices map
+        const productPrices = {};
+        {% for product in products %}
+        productPrices[{{ product.id }}] = {{ product.price }};
+        {% endfor %}
+
+        // Helper function to update subtotal for a row
+        function updateSubtotal(row) {
+            const quantityInput = row.querySelector('.item-quantity');
+            const priceInput = row.querySelector('.item-price');
+            const subtotalInput = row.querySelector('.item-subtotal');
+            
+            if (quantityInput && priceInput && subtotalInput) {
+                const quantity = parseFloat(quantityInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                const subtotal = (quantity * price).toFixed(2);
+                subtotalInput.value = subtotal;
+                return parseFloat(subtotal);
+            }
+            return 0;
+        }
+
+        // Helper function to update total
+        function updateTotal() {
+            let total = 0;
+            let itemCount = 0;
+            
+            // Calculate total directly from quantity and price for all order items
+            document.querySelectorAll('.order-item-row').forEach(function(row) {
+                const quantityInput = row.querySelector('.item-quantity');
+                const priceInput = row.querySelector('.item-price');
+                const subtotalInput = row.querySelector('.item-subtotal');
+                
+                if (quantityInput && priceInput) {
+                    const quantity = parseFloat(quantityInput.value) || 0;
+                    const price = parseFloat(priceInput.value) || 0;
+                    const rowTotal = quantity * price;
+                    
+                    // Update subtotal display
+                    if (subtotalInput) {
+                        subtotalInput.value = rowTotal.toFixed(2);
+                    }
+                    
+                    total += rowTotal;
+                    itemCount++;
+                }
+            });
+            
+            const formattedTotal = total.toFixed(2);
+            
+            // Update the visual display first (always works)
+            const displayElement = document.getElementById('calculated-total-display');
+            if (displayElement) {
+                displayElement.textContent = formattedTotal;
+            }
+            
+            // Update the total input field - try multiple ways to find it
+            let totalInput = document.getElementById('order-total');
+            
+            // Fallback: try to find by name attribute (Symfony form field)
+            if (!totalInput) {
+                totalInput = document.querySelector('input[name*="[total]"]');
+            }
+            
+            // Fallback: try to find by class
+            if (!totalInput) {
+                const inputs = document.querySelectorAll('input.form-control[readonly]');
+                inputs.forEach(function(input) {
+                    if (input.name && input.name.includes('total')) {
+                        totalInput = input;
+                    }
+                });
+            }
+            
+            if (totalInput) {
+                // Try multiple methods to update the input field
+                // Method 1: Direct value assignment
+                totalInput.value = formattedTotal;
+                
+                // Method 2: Set attribute
+                totalInput.setAttribute('value', formattedTotal);
+                
+                // Method 3: Use requestAnimationFrame to ensure DOM update
+                requestAnimationFrame(function() {
+                    totalInput.value = formattedTotal;
+                    // Trigger events after setting value
+                    totalInput.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+                    totalInput.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+                });
+            } else {
+                console.warn('Total input field not found by ID, name, or class');
+            }
+            
+            // Debug log
+            console.log('Total calculated:', formattedTotal, 'from', itemCount, 'items', 'Input found:', !!totalInput);
+        }
+
+        // Add new item
+        addButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            const prototype = itemsList.dataset.prototype;
+            if (!prototype) {
+                console.error('Prototype not found');
+                return;
+            }
+            
+            const newForm = prototype.replace(/__item_name__/g, index);
+            const newRow = document.createElement('div');
+            newRow.className = 'order-item-row card mb-3';
+            newRow.setAttribute('data-index', index);
+            
+            // Parse the prototype HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newForm;
+            
+            // Extract and modify form fields
+            let productHtml = '';
+            let quantityHtml = '';
+            let priceHtml = '';
+            
+            // Find product field (select)
+            const productSelect = tempDiv.querySelector('select[name*="product"]');
+            if (productSelect) {
+                productSelect.className = 'form-select product-select';
+                productSelect.setAttribute('required', 'required');
+                productHtml = productSelect.outerHTML;
+            } else {
+                console.error('Product select not found in prototype');
+            }
+            
+            // Find quantity field
+            const quantityInput = tempDiv.querySelector('input[name*="quantity"]');
+            if (quantityInput) {
+                quantityInput.className = 'form-control item-quantity';
+                quantityInput.setAttribute('min', '1');
+                quantityInput.setAttribute('value', '1');
+                quantityInput.setAttribute('required', 'required');
+                quantityHtml = quantityInput.outerHTML;
+            }
+            
+            // Find price field
+            const priceInput = tempDiv.querySelector('input[name*="price"]');
+            if (priceInput) {
+                priceInput.className = 'form-control item-price';
+                priceInput.setAttribute('readonly', 'readonly');
+                priceInput.setAttribute('value', '0.00');
+                priceHtml = priceInput.outerHTML;
+            }
+            
+            // Build the row HTML
+            newRow.innerHTML = `
+                <div class="card-body">
+                    <div class="row align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label">Product</label>
+                            ${productHtml}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Quantity</label>
+                            ${quantityHtml}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Price</label>
+                            <div class="input-group">
+                                ${priceHtml}
+                                <span class="input-group-text">€</span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Subtotal</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control item-subtotal" readonly value="0.00">
+                                <span class="input-group-text">€</span>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mt-2">
+                            <button type="button" class="btn btn-sm btn-danger remove-item-btn">
+                                <i class="bi bi-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove the info alert if it exists
+            const infoAlert = itemsList.parentElement.querySelector('.alert-info');
+            if (infoAlert) {
+                infoAlert.remove();
+            }
+            
+            itemsList.appendChild(newRow);
+            index++;
+            itemsList.dataset.index = index;
+            
+            // Initialize the new row
+            const newProductSelect = newRow.querySelector('.product-select');
+            const newQuantityInput = newRow.querySelector('.item-quantity');
+            const newPriceInput = newRow.querySelector('.item-price');
+            
+            // Set default quantity
+            if (newQuantityInput) {
+                newQuantityInput.value = '1';
+            }
+            
+            // If a product is already selected (shouldn't happen for new rows, but just in case)
+            if (newProductSelect && newProductSelect.value) {
+                const productId = newProductSelect.value;
+                if (productPrices[productId] && newPriceInput) {
+                    newPriceInput.value = productPrices[productId].toFixed(2);
+                    updateSubtotal(newRow);
+                }
+            }
+            
+            // Update subtotal and total immediately
+            updateSubtotal(newRow);
+            updateTotal();
+        });
+
+        // Use event delegation for all dynamic events
+        itemsList.addEventListener('click', function(e) {
+            if (e.target.closest('.remove-item-btn')) {
+                e.preventDefault();
+                const row = e.target.closest('.order-item-row');
+                if (row) {
+                    row.remove();
+                    updateTotal();
+                    
+                    // Show info alert if no items left
+                    if (itemsList.querySelectorAll('.order-item-row').length === 0) {
+                        const infoAlert = document.createElement('div');
+                        infoAlert.className = 'alert alert-info';
+                        infoAlert.innerHTML = '<i class="bi bi-info-circle"></i> No items added yet. Click "Add Product" to start adding items to this order.';
+                        itemsList.parentElement.insertBefore(infoAlert, itemsList);
+                    }
+                }
+            }
+        });
+
+        // Update price when product is selected (using event delegation)
+        itemsList.addEventListener('change', function(e) {
+            if (e.target.classList.contains('product-select')) {
+                const row = e.target.closest('.order-item-row');
+                if (!row) return;
+                
+                const productId = e.target.value;
+                const priceInput = row.querySelector('.item-price');
+                const quantityInput = row.querySelector('.item-quantity');
+                
+                if (productId && productPrices[productId] && priceInput) {
+                    const price = productPrices[productId];
+                    priceInput.value = price.toFixed(2);
+                    
+                    // Ensure quantity is at least 1
+                    if (quantityInput) {
+                        if (!quantityInput.value || parseFloat(quantityInput.value) < 1) {
+                            quantityInput.value = '1';
+                        }
+                    }
+                    
+                    // Immediately update subtotal and total
+                    updateSubtotal(row);
+                    updateTotal();
+                } else if (priceInput) {
+                    priceInput.value = '0.00';
+                    updateSubtotal(row);
+                    updateTotal();
+                }
+            }
+        });
+
+        // Update subtotal when quantity or price changes (using event delegation)
+        itemsList.addEventListener('input', function(e) {
+            if (e.target.classList.contains('item-quantity') || e.target.classList.contains('item-price')) {
+                const row = e.target.closest('.order-item-row');
+                if (row) {
+                    updateSubtotal(row);
+                    updateTotal();
+                }
+            }
+        });
+
+        // Also listen for change events on quantity (for spinner controls and number inputs)
+        itemsList.addEventListener('change', function(e) {
+            if (e.target.classList.contains('item-quantity')) {
+                const row = e.target.closest('.order-item-row');
+                if (row) {
+                    updateSubtotal(row);
+                    updateTotal();
+                }
+            }
+        });
+
+        // Initialize totals for existing items on page load
+        function initializeExistingItems() {
+            document.querySelectorAll('.order-item-row').forEach(function(row) {
+                const productSelect = row.querySelector('.product-select');
+                const priceInput = row.querySelector('.item-price');
+                const quantityInput = row.querySelector('.item-quantity');
+                const subtotalInput = row.querySelector('.item-subtotal');
+                
+                // If product is already selected, ensure price is set
+                if (productSelect && productSelect.value && productPrices[productSelect.value] && priceInput) {
+                    priceInput.value = productPrices[productSelect.value].toFixed(2);
+                }
+                
+                // Calculate and set subtotal for existing items
+                updateSubtotal(row);
+            });
+            
+            // Update total after initialization
+            updateTotal();
+        }
+
+        // Initialize existing items
+        initializeExistingItems();
+    }
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initOrderForm);
+    } else {
+        initOrderForm();
+    }
+})();
+</script>
