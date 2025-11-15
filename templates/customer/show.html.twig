@@ -10,10 +10,10 @@
                 <p class="text-muted mb-0">View customer information</p>
             </div>
             <div>
-                <a href="{{ path('app_customer_index') }}" class="btn btn-outline-secondary">
+                <a href="{{ path('app_admin_customer_index') }}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left"></i> Back to List
                 </a>
-                <a href="{{ path('app_customer_edit', {'id': customer.id}) }}" class="btn btn-primary">
+                <a href="{{ path('app_admin_customer_edit', {'id': customer.id}) }}" class="btn btn-primary">
                     <i class="bi bi-pencil-square"></i> Edit
                 </a>
             </div>
@@ -91,7 +91,7 @@
                                             </td>
                                             <td><strong>{{ order.total|number_format(2, '.', ',') }} €</strong></td>
                                             <td class="text-end">
-                                                <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-sm btn-outline-info">
+                                                <a href="{{ path('app_admin_order_show', {'id': order.id}) }}" class="btn btn-sm btn-outline-info">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
                                             </td>

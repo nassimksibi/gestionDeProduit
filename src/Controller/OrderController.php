@@ -11,11 +11,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/order')]
+#[Route('/admin/order')]
+#[IsGranted('ROLE_ADMIN')]
 final class OrderController extends AbstractController
 {
-    #[Route(name: 'app_order_index', methods: ['GET'])]
+    #[Route(name: 'app_admin_order_index', methods: ['GET'])]
     public function index(OrderRepository $orderRepository): Response
     {
         return $this->render('order/index.html.twig', [
@@ -23,7 +25,7 @@ final class OrderController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_order_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'app_admin_order_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, ProductRepository $productRepository): Response
     {
         $order = new Order();
@@ -44,7 +46,7 @@ final class OrderController extends AbstractController
             $entityManager->persist($order);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_admin_order_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('order/new.html.twig', [
@@ -54,7 +56,7 @@ final class OrderController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_order_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_admin_order_show', methods: ['GET'])]
     public function show(Order $order): Response
     {
         return $this->render('order/show.html.twig', [
@@ -62,7 +64,7 @@ final class OrderController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_order_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_admin_order_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Order $order, EntityManagerInterface $entityManager, ProductRepository $productRepository): Response
     {
         $form = $this->createForm(OrderType::class, $order);
@@ -81,7 +83,7 @@ final class OrderController extends AbstractController
             $order->setTotal($order->calculateTotal());
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_admin_order_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('order/edit.html.twig', [
@@ -91,7 +93,7 @@ final class OrderController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_order_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_admin_order_delete', methods: ['POST'])]
     public function delete(Request $request, Order $order, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$order->getId(), $request->getPayload()->getString('_token'))) {
@@ -99,7 +101,7 @@ final class OrderController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_admin_order_index', [], Response::HTTP_SEE_OTHER);
     }
 }
 

@@ -21,7 +21,9 @@ framework:
             messenger.bus.default: []
 
         routing:
-            Symfony\Component\Mailer\Messenger\SendEmailMessage: async
+            # Email messages are sent synchronously by default (no routing)
+            # To send emails asynchronously, uncomment the line below and change 'async' to your transport name
+            # 'Symfony\Component\Mailer\Messenger\SendEmailMessage': async
             Symfony\Component\Notifier\Message\ChatMessage: async
             Symfony\Component\Notifier\Message\SmsMessage: async
 

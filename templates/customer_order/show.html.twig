@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Order #{{ order.id }}{% endblock %}
+
+{% block body %}
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0"><i class="bi bi-bag-check"></i> Order #{{ order.id }}</h1>
+                <p class="text-muted mb-0">Order details</p>
+            </div>
+            <a href="{{ path('app_customer_orders') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Orders
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Items</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.orderItems %}
+                                    <tr>
+                                        <td><strong>{{ item.product.label }}</strong></td>
+                                        <td>{{ item.price|number_format(2, '.', ',') }} €</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td><strong>{{ item.subtotal|number_format(2, '.', ',') }} €</strong></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3" class="text-end">Total:</th>
+                                    <th>{{ order.total|number_format(2, '.', ',') }} €</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Order Date:</strong><br>{{ order.orderDate|date('Y-m-d H:i') }}</p>
+                    <p><strong>Status:</strong><br>
+                        {% set statusColors = {
+                            'pending': 'warning',
+                            'processing': 'info',
+                            'shipped': 'primary',
+                            'delivered': 'success',
+                            'cancelled': 'danger'
+                        } %}
+                        <span class="badge bg-{{ statusColors[order.status] ?? 'secondary' }}">
+                            {{ order.status|capitalize }}
+                        </span>
+                    </p>
+                    <p><strong>Total:</strong><br><strong class="text-primary">{{ order.total|number_format(2, '.', ',') }} €</strong></p>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Customer Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ order.customer.name }}</p>
+                    <p><strong>Email:</strong> {{ order.customer.email }}</p>
+                    {% if order.customer.address %}
+                        <p><strong>Address:</strong> {{ order.customer.address }}</p>
+                    {% endif %}
+                    {% if order.customer.phone %}
+                        <p><strong>Phone:</strong> {{ order.customer.phone }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

@@ -195,7 +195,7 @@
                             </table>
                         </div>
                         <div class="mt-3">
-                            <a href="{{ path('app_order_index') }}" class="btn btn-outline-primary btn-sm">View All Orders</a>
+                            <a href="{{ path('app_admin_order_index') }}" class="btn btn-outline-primary btn-sm">View All Orders</a>
                         </div>
                     {% else %}
                         <p class="text-muted mb-0">No recent orders</p>
@@ -237,13 +237,13 @@
                     </div>
                     <hr>
                     <div class="d-grid gap-2">
-                        <a href="{{ path('app_product_index') }}" class="btn btn-outline-primary btn-sm">
+                        <a href="{{ path('app_admin_product_index') }}" class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-box-seam"></i> Manage Products
                         </a>
-                        <a href="{{ path('app_customer_index') }}" class="btn btn-outline-success btn-sm">
+                        <a href="{{ path('app_admin_customer_index') }}" class="btn btn-outline-success btn-sm">
                             <i class="bi bi-people"></i> Manage Customers
                         </a>
-                        <a href="{{ path('app_order_index') }}" class="btn btn-outline-info btn-sm">
+                        <a href="{{ path('app_admin_order_index') }}" class="btn btn-outline-info btn-sm">
                             <i class="bi bi-cart-check"></i> Manage Orders
                         </a>
                     </div>

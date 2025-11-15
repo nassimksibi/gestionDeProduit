@@ -4,26 +4,46 @@ security:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        users_in_memory: { memory: null }
+        app_customer_provider:
+            entity:
+                class: App\Entity\Customer
+                property: email
+        app_admin_provider:
+            entity:
+                class: App\Entity\Admin
+                property: email
+        chain_provider:
+            chain:
+                providers: ['app_customer_provider', 'app_admin_provider']
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
             lazy: true
-            provider: users_in_memory
-
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
-
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
+            provider: chain_provider
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                default_target_path: app_home
+                enable_csrf: true
+            logout:
+                path: app_logout
+                target: app_home
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/shop/add-to-cart, roles: ROLE_CUSTOMER }
+        - { path: ^/shop/cart, roles: ROLE_CUSTOMER }
+        - { path: ^/shop/checkout, roles: ROLE_CUSTOMER }
+        - { path: ^/shop/update, roles: ROLE_CUSTOMER }
+        - { path: ^/shop/remove, roles: ROLE_CUSTOMER }
+        - { path: ^/my-orders, roles: ROLE_CUSTOMER }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/shop, roles: PUBLIC_ACCESS }
 
 when@test:
     security:
