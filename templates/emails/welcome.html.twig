@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #007bff;
+            margin: 0;
+        }
+        .content {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to Our Platform!</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hello {{ customer.name }},</p>
+            
+            <p>We're excited to inform you that your account has been created successfully!</p>
+            
+            <p>Your account details:</p>
+            <ul>
+                <li><strong>Name:</strong> {{ customer.name }}</li>
+                <li><strong>Email:</strong> {{ customer.email }}</li>
+            </ul>
+            
+            <p>You can now log in to your account and start exploring our services.</p>
+            
+            <div style="text-align: center;">
+                <a href="{{ loginUrl }}" class="button" style="color: #ffffff; text-decoration: none;">Login to Your Account</a>
+            </div>
+            
+            <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+            
+            <p>Thank you for joining us!</p>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated email. Please do not reply to this message.</p>
+            <p>&copy; {{ "now"|date("Y") }} Your App. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+

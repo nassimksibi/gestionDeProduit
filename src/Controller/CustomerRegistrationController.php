@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Customer;
 use App\Form\RegistrationFormType;
 use App\Repository\CustomerRepository;
+use App\Service\EmailService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,7 +21,8 @@ class CustomerRegistrationController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $entityManager,
-        CustomerRepository $customerRepository
+        CustomerRepository $customerRepository,
+        EmailService $emailService
     ): Response {
         if ($this->getUser()) {
             return $this->redirectToRoute('app_home');
@@ -48,6 +50,12 @@ class CustomerRegistrationController extends AbstractController
                 )
             );
 
+            // Generate verification token
+            $verificationToken = bin2hex(random_bytes(32));
+            $customer->setVerificationToken($verificationToken);
+            $customer->setTokenExpiresAt(new \DateTimeImmutable('+24 hours'));
+            $customer->setIsVerified(false);
+
             try {
                 $entityManager->persist($customer);
                 $entityManager->flush();
@@ -58,7 +66,15 @@ class CustomerRegistrationController extends AbstractController
                 ]);
             }
 
-            $this->addFlash('success', 'Registration successful! You can now login.');
+            // Send verification email
+            try {
+                $emailService->sendVerificationEmail($customer, $verificationToken);
+                $this->addFlash('success', 'Registration successful! Please check your email to verify your account before logging in.');
+            } catch (\Exception $e) {
+                // Log the error but don't prevent registration
+                error_log('Verification email sending failed: ' . $e->getMessage());
+                $this->addFlash('warning', 'Registration successful, but we couldn\'t send the verification email. Please use the resend verification link.');
+            }
 
             return $this->redirectToRoute('app_login');
         }
